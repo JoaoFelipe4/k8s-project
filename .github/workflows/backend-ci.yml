@@ -42,11 +42,10 @@ jobs:
 
       # --- Integração com AWS ECR via OIDC ---
       
-      # Descomente e preencha com seus dados quando o OIDC estiver configurado na AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::364337333396:role/GitHubActions-ECR-Push-Role
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-2
 
       - name: Login to Amazon ECR
@@ -55,10 +54,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          # Exemplo de build local apenas
           docker build -t backend-service:${{ github.sha }} .
           
-          # Exemplo de build e push para ECR (descomente apos configurar a etapa anterior)
+          # Exemplo de build e push para ECR (ajuste a variavel REPOSITORY com o nome do seu ECR)
           # REGISTRY=${{ steps.login-ecr.outputs.registry }}
           # REPOSITORY=meu-repositorio-ecr
           # IMAGE_TAG=${{ github.sha }}
