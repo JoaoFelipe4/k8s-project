@@ -55,16 +55,16 @@ To ensure no other GitHub repository can assume your role, you must edit the Tru
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
                 "StringEquals": {
-                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
-                },
-                "StringLike": {
-                    "token.actions.githubusercontent.com:sub": "repo:YourGitHubUsername/YourRepositoryName:*"
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                    "token.actions.githubusercontent.com:sub": "repo:YourGitHubUsername@YOUR_ID/YourRepositoryName@REPO_ID:ref:refs/heads/main"
                 }
             }
         }
     ]
 }
 ```
+
+> **Security Note:** GitHub appends unique IDs (e.g., `@142893060`) to the repository claims. Using `StringEquals` with these exact IDs and restricting to the `main` branch is the most secure configuration, preventing repository hijacking via renaming attacks.
 
 ### Step 5: Configure the GitHub Workflow
 

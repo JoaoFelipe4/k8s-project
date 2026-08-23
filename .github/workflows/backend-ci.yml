@@ -52,13 +52,15 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker Image
+      - name: Build and Push Docker Image to ECR
         run: |
-          docker build -t backend-service:${{ github.sha }} .
+          # Define as variáveis
+          REGISTRY=${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY=k8s-project-backend
+          IMAGE_TAG=${{ github.sha }}
           
-          # Exemplo de build e push para ECR (ajuste a variavel REPOSITORY com o nome do seu ECR)
-          # REGISTRY=${{ steps.login-ecr.outputs.registry }}
-          # REPOSITORY=meu-repositorio-ecr
-          # IMAGE_TAG=${{ github.sha }}
-          # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          # docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          # Realiza o Build
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          
+          # Envia a imagem para o ECR
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
