@@ -22,7 +22,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "k8s-project-node-group"
   node_role_arn   = aws_iam_role.eks_node_role.arn
-  
+
   # Instancia provisionada nas subnets publicas
   subnet_ids = [
     aws_subnet.public_a.id,

@@ -17,12 +17,12 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_subnet" "public_a" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.0.0/20"
-  availability_zone       = "us-east-2a"
-  
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.0.0/20"
+  availability_zone = "us-east-2a"
+
   # Essencial: Auto-atribuir IP publico para Nodes sem NAT acessarem a web
-  map_public_ip_on_launch = true 
+  map_public_ip_on_launch = true
 
   tags = {
     Name                     = "public-subnet-a"
