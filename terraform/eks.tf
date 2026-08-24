@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "main" {
   name     = "k8s-project-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
-  version  = "1.30"
+  version  = "1.35"
 
   vpc_config {
     subnet_ids = [
@@ -35,9 +35,9 @@ resource "aws_eks_node_group" "main" {
     min_size     = 1
   }
 
-  ami_type       = "AL2023_x86_64" # Amazon Linux 2023 (Padrão para EKS >= 1.30)
-  instance_types = ["t3.small"]    # t3.small reduz custos, sendo o minimo recomendavel para EKS
-  capacity_type  = "ON_DEMAND"     # Pode ser alterado para SPOT p/ reduzir custos
+  ami_type       = "AL2023_x86_64_STANDARD"
+  instance_types = ["t3.small"] # t3.small reduz custos, sendo o minimo recomendavel para EKS
+  capacity_type  = "ON_DEMAND"  # Pode ser alterado para SPOT p/ reduzir custos
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_node_policy,
