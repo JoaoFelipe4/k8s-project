@@ -36,7 +36,7 @@ resource "aws_eks_node_group" "main" {
   }
 
   instance_types = ["t3.small"] # t3.small reduz custos, sendo o minimo recomendavel para EKS
-  capacity_type  = "ON_DEMAND"   # Pode ser alterado para SPOT p/ reduzir custos
+  capacity_type  = "ON_DEMAND"  # Pode ser alterado para SPOT p/ reduzir custos
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_node_policy,
