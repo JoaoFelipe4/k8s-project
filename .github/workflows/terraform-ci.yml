@@ -10,6 +10,17 @@ on:
   pull_request:
     paths:
       - 'terraform/**'
+  # Permite acionar a pipeline manualmente pela interface do GitHub (ótimo para rodar o Destroy)
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform Action to Perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
 
 # Permissões globais necessárias para o OIDC do GitHub
 permissions:
@@ -19,6 +30,8 @@ permissions:
 jobs:
   terraform-plan:
     name: 'Terraform Plan'
+    # Evita rodar o plan se a acao manual for destroy
+    if: github.event.inputs.action != 'destroy'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -48,17 +61,13 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      # Para projetos complexos, você pode fazer upload do artefato 'tfplan' aqui
-      # para garantir que o apply rode exatamente o que foi planejado.
-
   terraform-apply:
     name: 'Terraform Apply (Requires Approval)'
     needs: terraform-plan
-    # Roda o apply SOMENTE se for um push/merge na main (Ignora Pull Requests)
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Roda se for push na main ou se foi disparado manualmente com action 'apply'
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event.inputs.action == 'apply')
     runs-on: ubuntu-latest
     
-    # É ESTA LINHA QUE GERA O BOTÃO DE APROVAÇÃO MANUAL
     environment: Production
     
     defaults:
@@ -85,3 +94,37 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+
+  terraform-destroy:
+    name: 'Terraform Destroy (DANGER)'
+    # Roda SOMENTE se o usuario disparar manualmente selecionando "destroy"
+    if: github.event.inputs.action == 'destroy'
+    runs-on: ubuntu-latest
+    
+    # Tambem exige sua aprovacao antes de destruir
+    environment: Production
+    
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: us-east-2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
