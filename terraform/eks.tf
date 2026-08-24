@@ -35,6 +35,7 @@ resource "aws_eks_node_group" "main" {
     min_size     = 1
   }
 
+  ami_type       = "AL2023_x86_64" # Amazon Linux 2023 (Padrão para EKS >= 1.30)
   instance_types = ["t3.small"] # t3.small reduz custos, sendo o minimo recomendavel para EKS
   capacity_type  = "ON_DEMAND"  # Pode ser alterado para SPOT p/ reduzir custos
 

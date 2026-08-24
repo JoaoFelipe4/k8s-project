@@ -56,7 +56,10 @@ To ensure no other GitHub repository can assume your role, you must edit the Tru
             "Condition": {
                 "StringEquals": {
                     "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-                    "token.actions.githubusercontent.com:sub": "repo:YourGitHubUsername@YOUR_ID/YourRepositoryName@REPO_ID:ref:refs/heads/main"
+                    "token.actions.githubusercontent.com:sub": [
+                        "repo:YourGitHubUsername@YOUR_ID/YourRepositoryName@REPO_ID:ref:refs/heads/main",
+                        "repo:YourGitHubUsername@YOUR_ID/YourRepositoryName@REPO_ID:environment:Production"
+                    ]
                 }
             }
         }
@@ -64,7 +67,7 @@ To ensure no other GitHub repository can assume your role, you must edit the Tru
 }
 ```
 
-> **Security Note:** GitHub appends unique IDs (e.g., `@142893060`) to the repository claims. Using `StringEquals` with these exact IDs and restricting to the `main` branch is the most secure configuration, preventing repository hijacking via renaming attacks.
+> **Security Note:** When GitHub Actions runs a job tied to a deployment `environment` (e.g., `Production`), the OIDC `sub` claim drops the branch reference and adopts the environment name. The Trust Policy above uses an array in `StringEquals` to securely permit both standard branch pushes (for `plan`) and environment deployments (for `apply`).
 
 ### Step 5: Configure the GitHub Workflow
 

@@ -104,7 +104,8 @@ You must create a Customer Managed Policy containing the absolute minimum action
                 "iam:ListInstanceProfiles",
                 "iam:ListRolePolicies",
                 "iam:ListAttachedRolePolicies",
-                "iam:TagRole"
+                "iam:TagRole",
+                "iam:CreateServiceLinkedRole"
             ],
             "Resource": "*"
         },
