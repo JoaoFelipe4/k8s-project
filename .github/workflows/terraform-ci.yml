@@ -27,6 +27,10 @@ permissions:
   id-token: write
   contents: read
 
+# Variaveis de ambiente globais para o Terraform
+env:
+  TF_VAR_admin_user_arn: ${{ secrets.EKS_ADMIN_USER_ARN }}
+
 jobs:
   terraform-plan:
     name: 'Terraform Plan'
