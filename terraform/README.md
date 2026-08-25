@@ -110,7 +110,20 @@ You must create a Customer Managed Policy containing the absolute minimum action
                 "iam:ListRolePolicies",
                 "iam:ListAttachedRolePolicies",
                 "iam:TagRole",
-                "iam:CreateServiceLinkedRole"
+                "iam:UntagRole",
+                "iam:CreateServiceLinkedRole",
+                "iam:CreateOpenIDConnectProvider",
+                "iam:DeleteOpenIDConnectProvider",
+                "iam:GetOpenIDConnectProvider",
+                "iam:TagOpenIDConnectProvider",
+                "iam:UntagOpenIDConnectProvider",
+                "iam:CreatePolicy",
+                "iam:DeletePolicy",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:ListPolicyVersions",
+                "iam:TagPolicy",
+                "iam:UntagPolicy"
             ],
             "Resource": "*"
         },
