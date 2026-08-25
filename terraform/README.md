@@ -74,6 +74,10 @@ Running 2 public Nodes incurs approximately **$7.20/month** in IP fees. Despite 
 ### 3. Security Groups
 Despite having public IPv4 addresses, security is strictly enforced via *Security Groups*. The EKS Nodes reject any inbound internet traffic that does not originate from the Application Load Balancer (ALB) or the EKS Control Plane.
 
+- **Control Plane**: Managed by AWS (highly available).
+- **Node Groups**: EC2 instances deployed in the Public Subnets (Amazon Linux 2023, x86_64).
+- **Ingress Controller (Automated Addon)**: The cluster is automatically bootstrapped with the **AWS Load Balancer Controller** via Terraform (Helm Provider). This controller runs inside the cluster and dynamically provisions an AWS Application Load Balancer (ALB) whenever a Kubernetes `Ingress` resource is deployed, routing traffic directly to the Pod IPs. It uses IAM Roles for Service Accounts (IRSA) for secure, least-privilege AWS API access.
+
 ## HTTPS Strategy (No Custom Domain)
 
 Since we do not own a custom domain to provision an ACM Certificate, the Application Load Balancer alone would only serve HTTP traffic. To securely provide HTTPS, we place **Amazon CloudFront** in front of the ALB. CloudFront automatically generates a secure, free HTTPS endpoint (e.g., `https://dxxxx.cloudfront.net`) and acts as a reverse proxy, forwarding traffic to the ALB over HTTP.
@@ -102,6 +106,7 @@ You must create a Customer Managed Policy containing the absolute minimum action
                 "iam:PassRole",
                 "iam:GetRole",
                 "iam:ListInstanceProfiles",
+                "iam:ListInstanceProfilesForRole",
                 "iam:ListRolePolicies",
                 "iam:ListAttachedRolePolicies",
                 "iam:TagRole",
