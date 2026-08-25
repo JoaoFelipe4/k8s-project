@@ -21,7 +21,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "k8s-project-tfstate-seu-id"
+    bucket  = "tf-state-k8s-project-2026-m5zl9y4dq0"
     key     = "eks-cluster/terraform.tfstate"
     region  = "us-east-2"
     encrypt = true
