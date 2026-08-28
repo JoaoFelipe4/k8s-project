@@ -1,5 +1,8 @@
 # Kubernetes Infrastructure Project
 
+🌐 **Live Environment:** [Access the Cloud-Native Architecture](http://k8s-default-backendi-7f10e8c5e4-301403971.us-east-2.elb.amazonaws.com)  
+*(Note: If the cluster is destroyed and recreated during IaC testing, this Load Balancer URL will change).*
+
 This repository contains the infrastructure and application definitions for a personal cloud-native platform. It is developed for study purposes and to host personal projects.
 
 ## Architecture Overview

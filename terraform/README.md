@@ -185,3 +185,21 @@ You must create a Customer Managed Policy containing the absolute minimum action
 }
 ```
 *Note: The `iam:PassRole` permission is absolutely critical. Without it, Terraform cannot link the EKS Role to the EC2 Worker Nodes.*
+
+## ⚠️ Critical Impediments for `terraform destroy` (Orphaned ALBs)
+
+When tearing down this infrastructure via `terraform destroy`, you **MUST** manually delete the Kubernetes `Ingress` resources first.
+
+### The Problem:
+The AWS Load Balancer Controller provisions Application Load Balancers (ALBs) and Target Groups dynamically on AWS **outside of Terraform's state**. 
+If you run `terraform destroy` while the ALB still exists, AWS will block the deletion of the VPC and Subnets because the ALB Network Interfaces (ENIs) are still attached to them. Furthermore, deleting the cluster leaves the ALB "orphaned", continuing to generate AWS billing charges with no easy way to clean it up via code.
+
+### The Solution:
+Before destroying the infrastructure, run the following command to instruct the Kubernetes controller to gracefully delete the ALB from AWS:
+```bash
+# Delete the Ingress (this triggers ALB deletion on AWS)
+kubectl delete -k k8s/base/backend/
+
+# Verify the ALB is completely gone from the AWS Console before proceeding.
+```
+Once the ALB is deleted, you may safely run `terraform destroy`.
