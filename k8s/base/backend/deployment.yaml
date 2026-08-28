@@ -18,6 +18,9 @@ spec:
         - name: backend
           # A pipeline CI (Actions/CodeBuild) ira injetar o Account ID e a Tag real aqui via Kustomize
           image: ECR_REGISTRY/k8s-project:latest
+          env:
+            - name: PORT
+              value: "3000"
           ports:
             - containerPort: 3000
           resources:
