@@ -4,8 +4,6 @@ metadata:
   name: backend-app
   labels:
     app: backend
-  annotations:
-    version: "1.0.1"
 spec:
   replicas: 2
   selector:
@@ -15,6 +13,8 @@ spec:
     metadata:
       labels:
         app: backend
+      annotations:
+        version: "1.0.2"
     spec:
       containers:
         - name: backend
