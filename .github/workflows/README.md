@@ -1,12 +1,18 @@
-# CI/CD Pipelines
+# Dual-Track CI Pipelines
 
-This directory contains GitHub Actions workflows.
+This directory contains the configurations for the **Continuous Integration (CI)** pipelines. 
+
+To demonstrate platform-agnostic engineering, this project implements a **Dual-Track CI Architecture**, allowing developers to build and test code using either:
+1. **GitHub Actions**: Configured via the `.yml` files in this directory.
+2. **AWS CodeBuild**: Configured via the `buildspec.yml` located in `app/backend/`.
 
 ## Responsibilities
 
+Regardless of the CI engine chosen, their responsibilities are strictly separated from Continuous Delivery (which is handled by ArgoCD):
 - Automated testing and linting of application code.
-- Building and pushing container images to a registry.
-- Static analysis of Kubernetes manifests and Terraform configurations.
+- Building and pushing container images to Amazon ECR.
+- Updating Git repository manifests (GitOps Handoff).
+- Static analysis of Terraform configurations.
 
 ## AWS Authentication (OIDC Setup)
 

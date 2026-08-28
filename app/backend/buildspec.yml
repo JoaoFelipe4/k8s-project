@@ -1,0 +1,43 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-2"
+    IMAGE_REPO_NAME: "k8s-project"
+  # secrets-manager:
+  #   GITHUB_TOKEN: "github-token-secret:token"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "Installing dependencies..."
+      - npm install
+  pre_build:
+    commands:
+      - echo "Running unit tests..."
+      - npm test
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo "Building the Docker image..."
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Pushing the Docker image to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo "Build completed on `date`"
+      
+      # Exemplo de integracao GitOps (Atualizacao do manifesto para o ArgoCD)
+      # - echo "Updating Kubernetes manifests with new image tag..."
+      # - git config --global user.email "codebuild@aws.com"
+      # - git config --global user.name "AWS CodeBuild"
+      # - cd ../../k8s/base/backend
+      # - sed -i "s/newTag:.*/newTag: $IMAGE_TAG/g" kustomization.yaml
+      # - git commit -am "chore(cd): update image tag to $IMAGE_TAG"
+      # - git push https://$GITHUB_TOKEN@github.com/JoaoFelipe4/k8s-project.git main

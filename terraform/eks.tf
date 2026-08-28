@@ -18,8 +18,12 @@ resource "aws_eks_cluster" "main" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
+  # Habilita os logs nativos do Control Plane (Monitoramento de seguranca e auditoria)
+  enabled_cluster_log_types = ["api", "audit", "authenticator"]
+
   depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy
+    aws_iam_role_policy_attachment.eks_cluster_policy,
+    aws_cloudwatch_log_group.eks_logs
   ]
 }
 
