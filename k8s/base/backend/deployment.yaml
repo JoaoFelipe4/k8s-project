@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: backend
-          # A pipeline backend-ci ira injetar a tag real da imagem aqui
-          image: YOUR_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/k8s-project:latest
+          # A pipeline CI (Actions/CodeBuild) ira injetar o Account ID e a Tag real aqui via Kustomize
+          image: ECR_REGISTRY/k8s-project:latest
           ports:
             - containerPort: 3000
           resources:

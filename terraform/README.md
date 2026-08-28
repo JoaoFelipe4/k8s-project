@@ -82,6 +82,15 @@ Despite having public IPv4 addresses, security is strictly enforced via *Securit
 
 Since we do not own a custom domain to provision an ACM Certificate, the Application Load Balancer alone would only serve HTTP traffic. To securely provide HTTPS, we place **Amazon CloudFront** in front of the ALB. CloudFront automatically generates a secure, free HTTPS endpoint (e.g., `https://dxxxx.cloudfront.net`) and acts as a reverse proxy, forwarding traffic to the ALB over HTTP.
 
+## EKS Access Entries (Admin Access)
+
+By default, an Amazon EKS cluster only grants `system:masters` (Admin) Kubernetes privileges to the IAM Principal that created the cluster (in this case, the GitHub Actions OIDC Role). This prevents human users from viewing or managing cluster resources via the AWS Console or `kubectl`.
+
+To solve this securely without modifying the deprecated `aws-auth` ConfigMap, this project implements **EKS Access Entries**. 
+- The cluster is configured with `authentication_mode = "API_AND_CONFIG_MAP"`.
+- A dynamic `aws_eks_access_entry` maps a designated human IAM User (injected via the `TF_VAR_admin_user_arn` variable) to the `AmazonEKSClusterAdminPolicy`.
+- This ensures the human administrator has native, auditable Admin access to the cluster directly from the AWS Console and local terminal.
+
 ## IAM Permissions Required for GitHub Actions (Terraform)
 
 For GitHub Actions to successfully execute `terraform apply` remotely via OIDC and provision this architecture (including IAM Roles for the cluster), the GitHub Service Role must be granted precise, least-privilege permissions.
@@ -123,7 +132,30 @@ You must create a Customer Managed Policy containing the absolute minimum action
                 "iam:GetPolicyVersion",
                 "iam:ListPolicyVersions",
                 "iam:TagPolicy",
-                "iam:UntagPolicy"
+                "iam:UntagPolicy",
+                "sns:CreateTopic",
+                "sns:DeleteTopic",
+                "sns:GetTopicAttributes",
+                "sns:SetTopicAttributes",
+                "sns:ListTagsForResource",
+                "sns:TagResource",
+                "sns:UntagResource",
+                "logs:CreateLogGroup",
+                "logs:DeleteLogGroup",
+                "logs:DescribeLogGroups",
+                "logs:ListTagsForResource",
+                "logs:ListTagsLogGroup",
+                "logs:TagResource",
+                "logs:UntagResource",
+                "logs:TagLogGroup",
+                "logs:UntagLogGroup",
+                "logs:PutRetentionPolicy",
+                "cloudwatch:PutMetricAlarm",
+                "cloudwatch:DeleteAlarms",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:ListTagsForResource",
+                "cloudwatch:TagResource",
+                "cloudwatch:UntagResource"
             ],
             "Resource": "*"
         },

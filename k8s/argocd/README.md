@@ -22,6 +22,12 @@ Regardless of the CI engine used, the handoff to ArgoCD remains consistent throu
    - ArgoCD detects the new Git commit containing the updated image tag.
    - ArgoCD automatically pulls the new manifest definitions and initiates a rolling update in the EKS cluster to deploy the new application version.
 
+## Security and Image Masking Strategy
+
+As a strategic architectural option to protect the AWS Account Number and prevent its exposure in the codebase, the Kubernetes deployment manifests utilize a generic placeholder (`ECR_REGISTRY`) instead of a hardcoded Amazon ECR URI.
+
+This approach ensures that the repository remains sterilized of sensitive infrastructure identifiers. The real AWS Account ID is securely injected at runtime exclusively within the EKS cluster boundary, leveraging ArgoCD's native Kustomize override capabilities during the rendering phase.
+
 ## Security Posture
 
 By decoupling the CI build phase from the CD deployment phase, this architecture drastically reduces the security blast radius. Neither GitHub Actions nor AWS CodeBuild require `kubectl` access, IAM access to the cluster, or broad EKS privileges. The deployment lifecycle is securely localized inside the cluster via ArgoCD.
