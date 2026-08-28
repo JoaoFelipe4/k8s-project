@@ -36,6 +36,6 @@ resource "aws_cloudwatch_metric_alarm" "node_cpu_high" {
 # Se deixarmos assim, em 1 ano a conta de logs na AWS ficara carissima.
 # Criamos o grupo via Terraform antes forçando a retencao de 7 dias (DevOps Best Practice).
 resource "aws_cloudwatch_log_group" "eks_logs" {
-  name              = "/aws/eks/${aws_eks_cluster.main.name}/cluster"
+  name              = "/aws/eks/k8s-project-cluster/cluster"
   retention_in_days = 7
 }
