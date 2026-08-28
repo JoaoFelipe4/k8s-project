@@ -60,7 +60,8 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           
           # Realiza o Build
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
           
-          # Envia a imagem para o ECR
+          # Envia as imagens para o ECR (SHA e Latest)
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
