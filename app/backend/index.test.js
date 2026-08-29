@@ -21,6 +21,6 @@ describe('GET /', () => {
   it('should return 200 and an HTML landing page', async () => {
     const res = await request(app).get('/');
     expect(res.statusCode).toBe(200);
-    expect(res.text).toContain('Platform Overview');
+    expect(res.text).toContain('PLATFORM_OVERVIEW');
   });
 });
