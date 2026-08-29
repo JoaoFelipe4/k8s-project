@@ -13,7 +13,7 @@ spec:
       # Preencha a URL abaixo com o ID real da sua conta AWS antes de aplicar no seu cluster.
       # ATENCAO: Nunca comite o arquivo com o seu ID real no GitHub!
       images:
-        - 'ECR_REGISTRY/k8s-project=YOUR_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/k8s-project:latest'
+        - 'ECR_REGISTRY/k8s-project=YOUR_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/k8s-project-backend'
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default
