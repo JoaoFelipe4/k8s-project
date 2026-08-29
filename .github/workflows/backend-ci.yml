@@ -74,12 +74,12 @@ jobs:
           # Navega ate a pasta da infraestrutura
           cd ../../k8s/base/backend
           
-          # Atualiza a imagem no Kustomize com a nova tag dinamica (preservando o placeholder de seguranca ECR_REGISTRY)
-          kustomize edit set image ECR_REGISTRY/k8s-project=ECR_REGISTRY/k8s-project-backend:${{ github.sha }}
+          # Atualiza a tag diretamente no deployment.yaml para que o ArgoCD consiga herdar a tag
+          sed -i "s|image: ECR_REGISTRY/k8s-project.*|image: ECR_REGISTRY/k8s-project:${{ github.sha }}|g" deployment.yaml
           
           # Configura o Git e faz o commit automatico
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          git add kustomization.yaml
+          git add deployment.yaml
           git commit -m "chore: gitops update backend image to sha-${{ github.sha }} [skip ci]"
           git push
