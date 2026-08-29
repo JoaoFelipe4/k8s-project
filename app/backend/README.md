@@ -26,3 +26,9 @@ ArgoCD, living inside the Kubernetes cluster, detects that the `latest` image ta
 
 ## Modifying Infrastructure for the App
 If your application suddenly needs a new Environment Variable, a new Port, or more CPU/Memory, you do **not** change it here. You must update the Kubernetes manifests located in `../../k8s/base/backend/deployment.yaml`. Once you commit that change, ArgoCD will immediately apply the new infrastructure settings to your application.
+
+## 🛠️ Troubleshooting: Node Image Caching (The "Force Pull" Flag)
+If you are developing locally or testing in an environment where you constantly overwrite the `:latest` image tag in ECR, you might notice that Kubernetes does not update your application even when new Pods are spun up.
+- **The Cause:** Kubernetes Worker Nodes (EC2) cache Docker images locally. If a Node already has an image named `:latest`, it will use the cached version to save bandwidth, completely ignoring the new image in ECR.
+- **The Fix:** We have explicitly added the flag `imagePullPolicy: Always` to the `deployment.yaml`. This forces the Kubernetes Kubelet to bypass the local cache and always download the fresh image from AWS ECR every time a Pod is created.
+*(Note: In a strict production environment, you should avoid the `:latest` tag entirely and use immutable Git Commit SHAs, which naturally prevents this caching issue).*
