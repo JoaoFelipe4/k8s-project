@@ -19,7 +19,7 @@ spec:
       containers:
         - name: backend
           # A pipeline CI (Actions/CodeBuild) ira injetar o Account ID e a Tag real aqui via Kustomize
-          image: ECR_REGISTRY/k8s-project:latest
+          image: ECR_REGISTRY/k8s-project:602f610f6a3da584d270eee3b029982f91332468
           imagePullPolicy: Always
           env:
             - name: PORT
