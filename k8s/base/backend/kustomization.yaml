@@ -7,4 +7,4 @@ resources:
 images:
 - name: ECR_REGISTRY/k8s-project
   newName: ECR_REGISTRY/k8s-project-backend
-  newTag: aa6caccdd4026f933c382f9877540982e7defdaf
+  newTag: c6122d4301b52995efa3a8c8a33926884796d9b3
