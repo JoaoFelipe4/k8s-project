@@ -12,6 +12,69 @@ The project is structured into three main layers:
 - Kubernetes deployment manifests and GitOps configurations.
 - Infrastructure as Code (IaC) for cluster provisioning.
 
+### 🏛️ Internal Infrastructure & Traffic Flow
+The following diagram illustrates how external traffic is routed through AWS into the EKS cluster, and how the CI/CD pipelines (GitHub Actions + ArgoCD) interact to deliver zero-downtime updates.
+
+```mermaid
+graph TD
+    %% Entidades Externas
+    User((Usuário / Internet))
+    GitHub[GitHub Repo]
+    GH_Action[GitHub Actions CI]
+
+    subgraph AWS_Cloud ["AWS Cloud"]
+        ECR[(Amazon ECR<br>Image Registry)]
+        ALB[Application Load Balancer]
+        CloudWatch[(Amazon CloudWatch)]
+
+        subgraph VPC ["VPC (Rede AWS)"]
+            
+            subgraph EKS ["☸️ EKS Cluster (k8s-project-cluster)"]
+                
+                subgraph NS_System ["Namespace: kube-system"]
+                    ALB_Controller[AWS Load Balancer Controller]
+                end
+
+                subgraph NS_Argo ["Namespace: argocd"]
+                    ArgoCD[ArgoCD Controller]
+                end
+
+                subgraph NS_App ["Namespace: default"]
+                    Ingress[Ingress Resource]
+                    SVC[Service: backend-service]
+                    
+                    subgraph EC2_Nodes ["Worker Nodes (EC2 t3.small)"]
+                        Pod1[Pod: backend-app]
+                        Pod2[Pod: backend-app]
+                    end
+                end
+            end
+        end
+    end
+
+    %% Fluxo de Tráfego de Usuário (Data Plane)
+    User ==>|HTTP/80| ALB
+    ALB ==>|Roteamento Nativo| Ingress
+    Ingress --> SVC
+    SVC --> Pod1
+    SVC --> Pod2
+
+    %% Fluxo de CI/CD (Control Plane)
+    GitHub -.->|Dispara Build| GH_Action
+    GH_Action -.->|Push da Imagem| ECR
+    GH_Action -.->|Write-back (Edita Manifest)| GitHub
+    
+    ArgoCD -.->|Observa Repo| GitHub
+    ArgoCD -.->|Aplica Mudanças| NS_App
+
+    %% Integrações de Sistema
+    Pod1 -.->|Puxa Imagem| ECR
+    Pod2 -.->|Puxa Imagem| ECR
+    ALB_Controller -.->|Provisiona| ALB
+    EKS -.->|Métricas/Logs| CloudWatch
+```
+
+
 ## Directory Structure
 
 - `app/`: Source code for the applications running on the cluster.
