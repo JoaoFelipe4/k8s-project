@@ -186,20 +186,31 @@ You must create a Customer Managed Policy containing the absolute minimum action
 ```
 *Note: The `iam:PassRole` permission is absolutely critical. Without it, Terraform cannot link the EKS Role to the EC2 Worker Nodes.*
 
-## ⚠️ Critical Impediments for `terraform destroy` (Orphaned ALBs)
+## ⚠️ Standard Operating Procedure (SOP) for Cluster Destruction
 
-When tearing down this infrastructure via `terraform destroy`, you **MUST** manually delete the Kubernetes `Ingress` resources first.
+When tearing down this infrastructure, you **cannot** simply run `terraform destroy`. You must follow the sequence below to prevent AWS Deadlocks (orphaned ALBs and ENIs locking the VPC).
 
-### The Problem:
-The AWS Load Balancer Controller provisions Application Load Balancers (ALBs) and Target Groups dynamically on AWS **outside of Terraform's state**. 
-If you run `terraform destroy` while the ALB still exists, AWS will block the deletion of the VPC and Subnets because the ALB Network Interfaces (ENIs) are still attached to them. Furthermore, deleting the cluster leaves the ALB "orphaned", continuing to generate AWS billing charges with no easy way to clean it up via code.
+### 🛡️ Step-by-Step Destroy Procedure
 
-### The Solution:
-Before destroying the infrastructure, run the following command to instruct the Kubernetes controller to gracefully delete the ALB from AWS:
+**Step 1: Disable the GitOps Engine (ArgoCD)**
+If you delete resources while ArgoCD is running, its `selfHeal` feature will instantly recreate them. You must delete the ArgoCD Application first:
 ```bash
-# Delete the Ingress (this triggers ALB deletion on AWS)
-kubectl delete -k k8s/base/backend/
-
-# Verify the ALB is completely gone from the AWS Console before proceeding.
+kubectl delete -f k8s/argocd/backend-application.yaml
 ```
-Once the ALB is deleted, you may safely run `terraform destroy`.
+
+**Step 2: Gracefully Delete the Load Balancer**
+The AWS Load Balancer Controller provisions ALBs outside of Terraform's state. You must instruct Kubernetes to delete it, freeing up the VPC Subnets:
+```bash
+kubectl delete -k k8s/base/backend/
+```
+*(Verify in the AWS Console > EC2 > Load Balancers that it has completely disappeared before proceeding).*
+
+**Step 3: Trigger Terraform Destroy via GitHub Actions**
+Do not run this locally to avoid state configuration issues. We have configured a safe, manual trigger in the CI/CD pipeline:
+1. Go to the **Actions** tab in this GitHub repository.
+2. Select **Terraform CI/CD** on the left.
+3. Click **Run workflow**.
+4. Change the action dropdown from `apply` to **`destroy`** and run.
+5. *(Security Check)*: Go to the running pipeline and click **Review deployments** to manually approve the destruction.
+
+*Note: The destruction process takes about 15-20 minutes. If the pipeline hangs for a few minutes on the `aws_internet_gateway` step, do not panic. AWS EKS sometimes takes extra time to clean up its internal Cross-Account ENIs. It will eventually resolve itself and succeed.*
